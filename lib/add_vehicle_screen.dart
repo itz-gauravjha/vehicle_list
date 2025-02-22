@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'api_service.dart';
-import 'vehicle_model.dart';
+import 'package:vehicle_app/api_service_add.dart';
+import 'package:vehicle_app/vehicle_model.dart'; // No prefix
 
 class AddVehicleScreen extends StatefulWidget {
   @override
@@ -33,10 +33,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Vehicle', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.blueAccent,
-        elevation: 0,
-        iconTheme: IconThemeData(color: Colors.white),
+        title: Text('Add Vehicle'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -44,38 +41,84 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
           key: _formKey,
           child: Column(
             children: [
-              Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15.0),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      _buildTextField(_vehicleNameController, 'Vehicle Name', Icons.directions_car),
-                      SizedBox(height: 20),
-                      _buildTextField(_modelController, 'Model', Icons.model_training),
-                      SizedBox(height: 20),
-                      _buildTextField(_registrationNoController, 'Registration No', Icons.confirmation_number),
-                      SizedBox(height: 20),
-                      _buildDateField(context),
-                      SizedBox(height: 20),
-                      _buildTextField(_milageController, 'Milage (km/liter)', Icons.speed),
-                    ],
+              TextFormField(
+                controller: _vehicleNameController,
+                decoration: InputDecoration(labelText: 'Vehicle Name'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the vehicle name';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: _modelController,
+                decoration: InputDecoration(labelText: 'Model'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the model';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: _registrationNoController,
+                decoration: InputDecoration(labelText: 'Registration No'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the registration number';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: _registrationDateController,
+                decoration: InputDecoration(
+                  labelText: 'Registration Date (YYYY-MM-DD)',
+                  suffixIcon: IconButton(
+                    icon: Icon(Icons.calendar_today),
+                    onPressed: () => _selectDate(context),
                   ),
                 ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please select the registration date';
+                  }
+                  return null;
+                },
+                readOnly: true,
               ),
-              SizedBox(height: 30),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: _milageController,
+                decoration: InputDecoration(labelText: 'Milage (km/liter)'),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the milage';
+                  }
+                  if (double.tryParse(value) == null) {
+                    return 'Please enter a valid number';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
+                    double milage = double.tryParse(_milageController.text) ?? 0.0;
+
+                    // Use the Vehicle class from vehicle_model.dart
                     Vehicle newVehicle = Vehicle(
                       vehicleName: _vehicleNameController.text,
                       model: _modelController.text,
                       registrationNo: _registrationNoController.text,
                       registrationDate: _registrationDateController.text,
-                      milageKmPerLiter: double.parse(_milageController.text),
+                      milageKmPerLiter: milage,
                     );
 
                     try {
@@ -91,67 +134,12 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                     }
                   }
                 },
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white, backgroundColor: Colors.blueAccent,
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30.0),
-                  ),
-                ),
-                child: Text('Add Vehicle', style: TextStyle(fontSize: 16)),
+                child: Text('Add Vehicle'),
               ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTextField(TextEditingController controller, String label, IconData icon) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon, color: Colors.blueAccent),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.0),
-          borderSide: BorderSide(color: Colors.blueAccent, width: 2.0),
-        ),
-      ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter $label';
-        }
-        return null;
-      },
-    );
-  }
-
-  Widget _buildDateField(BuildContext context) {
-    return TextFormField(
-      controller: _registrationDateController,
-      decoration: InputDecoration(
-        labelText: 'Registration Date (YYYY-MM-DD)',
-        prefixIcon: Icon(Icons.calendar_today, color: Colors.blueAccent),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.0),
-          borderSide: BorderSide(color: Colors.blueAccent, width: 2.0),
-        ),
-      ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please select the registration date';
-        }
-        return null;
-      },
-      readOnly: true,
-      onTap: () => _selectDate(context),
     );
   }
 
