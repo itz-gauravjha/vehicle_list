@@ -1,13 +1,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'vehicle_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+final baseUrl = dotenv.get('BASE_URL');
 class ApiService {
-  static const String baseUrl = 'https://vehicle-assingment.onrender.com/api/vehicles/';
-
+  
   // Fetch all vehicles
   static Future<List<Vehicle>> getVehicles() async {
-    final response = await http.get(Uri.parse(baseUrl));
+    final response = await http.get(Uri.parse('$baseUrl/api/vehicles'));
 
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);

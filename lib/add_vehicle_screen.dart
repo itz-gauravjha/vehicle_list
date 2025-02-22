@@ -15,17 +15,15 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
   final _registrationDateController = TextEditingController();
   final _milageController = TextEditingController();
 
-  // Function to show the date picker
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(), // Default date
-      firstDate: DateTime(2000), // Earliest selectable date
-      lastDate: DateTime(2101), // Latest selectable date
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
     );
     if (picked != null) {
       setState(() {
-        // Format the date as "YYYY-MM-DD" and set it in the controller
         _registrationDateController.text = "${picked.toLocal()}".split(' ')[0];
       });
     }
@@ -35,73 +33,40 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Vehicle'),
+        title: Text('Add Vehicle', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.blueAccent,
+        elevation: 0,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
-              TextFormField(
-                controller: _vehicleNameController,
-                decoration: InputDecoration(labelText: 'Vehicle Name'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter the vehicle name';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _modelController,
-                decoration: InputDecoration(labelText: 'Model'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter the model';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _registrationNoController,
-                decoration: InputDecoration(labelText: 'Registration No'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter the registration number';
-                  }
-                  return null;
-                },
-              ),
-              // Date Picker Field
-              TextFormField(
-                controller: _registrationDateController,
-                decoration: InputDecoration(
-                  labelText: 'Registration Date (YYYY-MM-DD)',
-                  suffixIcon: IconButton(
-                    icon: Icon(Icons.calendar_today),
-                    onPressed: () => _selectDate(context), // Open date picker
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      _buildTextField(_vehicleNameController, 'Vehicle Name', Icons.directions_car),
+                      SizedBox(height: 20),
+                      _buildTextField(_modelController, 'Model', Icons.model_training),
+                      SizedBox(height: 20),
+                      _buildTextField(_registrationNoController, 'Registration No', Icons.confirmation_number),
+                      SizedBox(height: 20),
+                      _buildDateField(context),
+                      SizedBox(height: 20),
+                      _buildTextField(_milageController, 'Milage (km/liter)', Icons.speed),
+                    ],
                   ),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please select the registration date';
-                  }
-                  return null;
-                },
-                readOnly: true, // Prevent manual editing
               ),
-              TextFormField(
-                controller: _milageController,
-                decoration: InputDecoration(labelText: 'Milage (km/liter)'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter the milage';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20),
+              SizedBox(height: 30),
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
@@ -118,7 +83,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Vehicle added successfully!')),
                       );
-                      Navigator.pop(context); // Go back to the previous screen
+                      Navigator.pop(context);
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Failed to add vehicle: $e')),
@@ -126,12 +91,67 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                     }
                   }
                 },
-                child: Text('Add Vehicle'),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white, backgroundColor: Colors.blueAccent,
+                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                ),
+                child: Text('Add Vehicle', style: TextStyle(fontSize: 16)),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String label, IconData icon) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: Colors.blueAccent),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.0),
+          borderSide: BorderSide(color: Colors.blueAccent, width: 2.0),
+        ),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter $label';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildDateField(BuildContext context) {
+    return TextFormField(
+      controller: _registrationDateController,
+      decoration: InputDecoration(
+        labelText: 'Registration Date (YYYY-MM-DD)',
+        prefixIcon: Icon(Icons.calendar_today, color: Colors.blueAccent),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.0),
+          borderSide: BorderSide(color: Colors.blueAccent, width: 2.0),
+        ),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please select the registration date';
+        }
+        return null;
+      },
+      readOnly: true,
+      onTap: () => _selectDate(context),
     );
   }
 
