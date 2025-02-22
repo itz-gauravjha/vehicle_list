@@ -8,7 +8,7 @@ class ApiService {
   
   // Fetch all vehicles
   static Future<List<Vehicle>> getVehicles() async {
-    final response = await http.get(Uri.parse('$baseUrl/api/vehicles'));
+    final response = await http.get(Uri.parse('$baseUrl/api/vehicles/'));
 
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
